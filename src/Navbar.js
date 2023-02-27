@@ -9,7 +9,7 @@ const Navbar = (props) =>{
                         src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" 
                         alt="cart-icon"
                     />
-                    <spna style={styles.cartCount}>3</spna>
+                    <spna style={styles.cartCount}>{props.count}</spna>
                 </div>
             </div>
     );
