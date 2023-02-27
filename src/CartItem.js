@@ -1,44 +1,9 @@
 import React from "react";
 
 class CartItem extends React.Component{
-    constructor(){
-        super();
-        this.state = {
-            price: 999,
-            title: 'Mobile Phone',
-            Qty: 1,
-            image: ''
-        }
-    }
-    increaseQuantity =()=>{
-        // this.state.Qty += 1;
-        // console.log('This.state',this.state);
-        //setstate from1
-        // this.setState({
-        //     Qty: this.state.Qty + 1
-        // })
-        //setstate from2 use previous state if required
-        this.setState((prevState) => {
-            return {
-                Qty: prevState.Qty + 1
-
-            }
-        })
-    }
-    decreaseQuantity =()=>{
-        const {Qty} = this.state;
-        if(Qty === 0){
-            return;
-        }
-        this.setState((prevState) => {
-            return {
-                Qty: prevState.Qty - 1
-
-            }
-        })
-    }
     render(){
-        const {price,title,Qty} = this.state;
+        // console.log('this.props.product',this.props);
+        const {price,title,Qty} = this.props.product;
         return (
             <div className="cart-item">
                 <div className="left-block">
@@ -54,13 +19,13 @@ class CartItem extends React.Component{
                                 alt="increase" 
                                 className="action-icons" 
                                 src="https://cdn-icons-png.flaticon.com/512/3303/3303893.png"
-                                onClick={this.increaseQuantity}
+                                onClick={()=> this.props.onIncreasQuantity(this.props.product)}
                             />
                             <img 
                                 alt="decrease" 
                                 className="action-icons" 
                                 src="https://cdn-icons-png.flaticon.com/512/992/992683.png"
-                                onClick={this.decreaseQuantity}
+                                onClick={()=> this.props.onDecreasQuantity(this.props.product)}
                             />
                             <img 
                                 alt="delete" 
