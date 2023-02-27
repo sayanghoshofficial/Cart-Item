@@ -4,9 +4,7 @@ import Cart from './Cart';
 
 function App() {
   return (
-    <div className="cart">
-      <Cart/>
-      <Cart/>
+    <div className="app">
       <Cart/>
     </div>
   );
