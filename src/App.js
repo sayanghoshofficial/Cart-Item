@@ -1,77 +1,98 @@
 import React from "react";
 import "./index.css";
-// import CartItem from './CartItem';
 import Cart from "./Cart";
 import Navbar from "./Navbar";
-// import * as firebase from 'firebase';
+import { firestore } from "./firebase";
+
+
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      products: [
-        {
-          Qty: 10,
-          price: 8999,
-          title: "Mobile phone",
-          img:
-            "https://www.91-img.com/pictures/132721-v10-vivo-v15-pro-mobile-phone-large-1.jpg?tr=h-330,q-75",
-          id: 1
-        },
-        {
-          Qty: 1,
-          price: 77777,
-          title: "Washing Machine",
-          img:
-            "https://images-na.ssl-images-amazon.com/images/I/81HApTZ8D8L._SL1500_.jpg",
-          id: 2
-        },
-        {
-          Qty: 4,
-          price: 999,
-          title: "Watch",
-          img:
-            "https://staticimg.titan.co.in/Titan/Catalog/1806SL03_1.jpg?pView=pdp",
-          id: 3
-        }
-      ]
+      products: [],
+      loading: true
     };
   }
 
-  handleIncreaseQuantity = product => {
-    const { products } = this.state;
+
+handleIncreaseQuantity = (product)=>{
+  const { products } = this.state;
     const index = products.indexOf(product);
+    //increase qty in firebase cloud directly
+    //using id below we get the ref of that product which we are increasing
+    const docRef = firestore.collection("products").doc(products[index].id);
 
-    products[index].Qty += 1;
+    docRef
+      .update({
+        Qty: products[index].Qty + 1,
+       // price: (products[index].price + product.price),
+      })
+      // .then(() => {
+      //   console.log("document updated successfully");
+      // })
+      .catch((error) => {
+        console.log("error", error);
+      });
+}
 
-    this.setState({
-      products
-    });
-  };
+ handleDecreaseQuantity = (product)=>{
+  const{products} = this.state;
+  const index = products.indexOf(product);
+  const docRef = firestore.collection('products').doc(products[index].id);
+  docRef
+  .update({
+   Qty: products[index].Qty-1,
+  })
+  // .then(()=>{
+  //   console.log(' Hii Arif DecreaseQuantity Qty',products[index].Qty);
+  // })
+  .catch((err)=>{
+    console.log("Hiii arif this is your ERROR",err)
+  });
 
-  handleDecreaseQuantity = product => {
+ }
+
+
+handleDeleteProduct = (id) => {
     const { products } = this.state;
-    const index = products.indexOf(product);
+    // const item = products.filter((item) => item.id !== id); //return Array which id not mach in the product list
 
-    if (products[index].Qty === 0) {
-      return;
-    }
-    products[index].Qty -= 1;
+    // this.setState({
+    //   products: item,
+    // });
+   const docRef = firestore.collection("products").doc(id);
+      docRef
+      .delete()
+      .then(()=>{
+          console.log('deleted id id :', id);
 
-    this.setState({
-      products
-    });
+      })
+      .catch((err)=>{
+        console.log('rthis is errr :',err);
+      })
+
   };
+  componentDidMount() {
+    //fetching all the products from the cloud firestore
+    firestore
+      //this.db
+      //query for fecthing the product which we want as per our query
+      .collection("products") //getting all the products
+      // .where('price','>=', 999) // after fetching db we should write query
+      .onSnapshot((snapshot) => {
+        const products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          data["id"] = doc.id;
+          return data;
+        });
 
-  handleDeleteProduct = id => {
-    const { products } = this.state;
-
-    const items = products.filter(product => product.id !== id);
-
-    this.setState({
-      products: items
-    });
-  };
-
+        this.setState({
+          products,
+          loading: false,
+        });
+       });
+  }
+  
   getcountOfCartItems = () => {
     const { products } = this.state;
     let count = 0;
@@ -82,6 +103,7 @@ class App extends React.Component {
 
     return count;
   };
+
 
   getcartTotal = () => {
     const { products } = this.state;
@@ -98,16 +120,21 @@ class App extends React.Component {
   };
 
   render() {
-    const { products } = this.state;
+    const { products , loading} = this.state;
     return (
       <div className="App">
-        <Navbar count={this.getcountOfCartItems()} />
-        <Cart
-          onIncreaseQuantity={this.handleIncreaseQuantity}
-          onDecreaseQuantity={this.handleDecreaseQuantity}
-          onDeleteProduct={this.handleDeleteProduct}
-          products={products}
+        <Navbar count={this.getcountOfCartItems()}
+         
         />
+        <Cart
+           products={products}
+          onIncreaseQuantity={this.handleIncreaseQuantity}
+          onDecreaseQuantity ={this.handleDecreaseQuantity}
+          onDeleteProduct ={this.handleDeleteProduct}
+         
+          
+        />
+        {loading && <h1> Loading Products ....</h1>}
         <div style={{ padding: 10, fontSize: 20 }}>
           TOTAL : {this.getcartTotal()}
         </div>
